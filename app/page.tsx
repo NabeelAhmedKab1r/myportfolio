@@ -63,9 +63,9 @@ const DOMAINS: Domain[] = [
 ];
 
 const LINKS = [
-  { label: "GitHub",   href: "https://github.com" },
-  { label: "LinkedIn", href: "https://linkedin.com" },
-  { label: "Email",    href: "mailto:hello@example.com" },
+  { label: "GitHub",   href: "https://github.com/NabeelAhmedKab1r" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/nabeelahmedkabir/" },
+  { label: "Email",    href: "mailto:nabeelahmedkabir@gmail.com" },
 ];
 
 // ─── Detail panel ─────────────────────────────────────────────────────────────
