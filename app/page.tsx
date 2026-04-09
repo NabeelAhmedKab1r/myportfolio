@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import DotGrid from "./components/DotGrid";
 
 // ─── Word-cycle typewriter ────────────────────────────────────────────────────
 const CYCLE_WORDS = ["SYSTEMS ENGINEER", "HARDWARE HACKER", "AI DEVELOPER", "FULL-STACK BUILDER"];
@@ -496,6 +497,11 @@ export default function Home() {
             zIndex: 1,
           }}
         >
+          {!isMobile && (
+            <div style={{ position: "absolute", right: PAD, top: "50%", transform: "translateY(-50%)", opacity: 0.6, pointerEvents: "auto" }}>
+              <DotGrid />
+            </div>
+          )}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -652,35 +658,49 @@ export default function Home() {
               03 — ABOUT
             </div>
 
-            <div style={{
-              fontSize: isMobile ? "clamp(28px,8vw,40px)" : "clamp(36px,5vw,68px)",
-              fontWeight: 900,
-              lineHeight: 1.15,
-              letterSpacing: "-0.025em",
-              maxWidth: 920,
-              marginBottom: 56,
-            }}>
-              <span style={{ color: "#F9FAFB" }}>I build at the </span>
-              <span style={{
-                background: "linear-gradient(135deg, #818CF8, #38BDF8)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-              }}>boundaries.</span>
-              <br />
-              <span style={{ color: "#4B5563" }}>Where hardware meets software,<br />data meets inference.</span>
-            </div>
-
-            <div style={{ display: "flex", gap: isMobile ? 28 : 56, flexWrap: "wrap" }}>
-              {[
-                { label: "DEGREE", value: "Computer Engineering" },
-                { label: "UNIVERSITY", value: "York University" },
-                { label: "STATUS", value: "3rd year, 2023–Present" },
-                { label: "CURRENTLY", value: "Building EvoCars" },
-              ].map((item) => (
-                <div key={item.label}>
-                  <div style={{ fontSize: 9, letterSpacing: "0.2em", color: "#374151", marginBottom: 8 }}>{item.label}</div>
-                  <div style={{ fontSize: 14, color: "#9CA3AF" }}>{item.value}</div>
+            <div style={{ display: "flex", gap: 64, alignItems: "flex-start", flexDirection: isMobile ? "column" : "row" }}>
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  fontSize: isMobile ? "clamp(28px,8vw,40px)" : "clamp(36px,5vw,68px)",
+                  fontWeight: 900,
+                  lineHeight: 1.15,
+                  letterSpacing: "-0.025em",
+                  marginBottom: 56,
+                }}>
+                  <span style={{ color: "#F9FAFB" }}>I build at the </span>
+                  <span style={{
+                    background: "linear-gradient(135deg, #818CF8, #38BDF8)",
+                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+                  }}>boundaries.</span>
+                  <br />
+                  <span style={{ color: "#4B5563" }}>Where hardware meets software,<br />data meets inference.</span>
                 </div>
-              ))}
+
+                <div style={{ display: "flex", gap: isMobile ? 28 : 40, flexWrap: "wrap" }}>
+                  {[
+                    { label: "DEGREE", value: "Computer Engineering" },
+                    { label: "UNIVERSITY", value: "York University" },
+                    { label: "STATUS", value: "3rd year, 2023–Present" },
+                    { label: "CURRENTLY", value: "Building EvoCars" },
+                  ].map((item) => (
+                    <div key={item.label}>
+                      <div style={{ fontSize: 9, letterSpacing: "0.2em", color: "#374151", marginBottom: 8 }}>{item.label}</div>
+                      <div style={{ fontSize: 14, color: "#9CA3AF" }}>{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {!isMobile && (
+                <div style={{ flexShrink: 0, width: 320, borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/photo.jpg"
+                    alt="Nabeel Ahmed Kabir"
+                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
+                  />
+                </div>
+              )}
             </div>
           </motion.div>
         </section>
