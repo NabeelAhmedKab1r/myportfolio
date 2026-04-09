@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Word-cycle typewriter ────────────────────────────────────────────────────
 const CYCLE_WORDS = ["SYSTEMS ENGINEER", "HARDWARE HACKER", "AI DEVELOPER", "FULL-STACK BUILDER"];
@@ -73,15 +73,7 @@ const PROJECTS: Project[] = [
     desc: "Snake game in Verilog on a DE10-Lite FPGA with VGA output at 640×480. Combinational and sequential logic for game state, rendering, and collision detection.",
     tech: ["Verilog", "FPGA", "VGA", "RTL"],
     link: "https://youtu.be/ExPmekK-cnw",
-    github: "https://github.com/NabeelAhmedKab1r/fpga-vga-snake",
-  },
-  {
-    name: "AI Debugger",
-    domain: "AI Systems",
-    domainColor: "#818CF8",
-    desc: "AI-powered debugging tool using Tree-Sitter for static code parsing, issue detection, and report generation. FastAPI backend.",
-    tech: ["Python", "FastAPI", "Tree-Sitter"],
-    github: "https://github.com/NabeelAhmedKab1r/ai-debugger",
+    github: "https://github.com/NabeelAhmedKab1r/SnakeGame-FPGA-Project",
   },
   {
     name: "ISS Tracker",
@@ -230,7 +222,7 @@ function Sidebar() {
 }
 
 // ─── Project card ─────────────────────────────────────────────────────────────
-function ProjectCard({ project, index }: { project: Project; index: number }) {
+function ProjectCard({ project, index, onClick }: { project: Project; index: number; onClick: () => void }) {
   const [hovered, setHovered] = useState(false);
   return (
     <motion.div
@@ -240,6 +232,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       transition={{ delay: index * 0.05, duration: 0.5 }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={onClick}
       style={{
         flexShrink: 0,
         width: 300,
@@ -257,7 +250,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         transform: hovered ? "translateY(-4px)" : "none",
         position: "relative",
         overflow: "hidden",
-        cursor: "default",
+        cursor: "pointer",
       }}
     >
       {/* Domain color top bar */}
@@ -296,19 +289,123 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             )}
           </div>
         </div>
-        <div style={{ fontWeight: 700, fontSize: 18, color: "#F1F5F9", marginBottom: 10, letterSpacing: "-0.01em" }}>{project.name}</div>
-        <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.75 }}>{project.desc}</div>
+        <div style={{ fontWeight: 700, fontSize: 18, color: "#F1F5F9", letterSpacing: "-0.01em" }}>{project.name}</div>
       </div>
+    </motion.div>
+  );
+}
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {project.tech.map((t) => (
-          <span key={t} style={{
-            fontSize: 10, padding: "3px 8px", borderRadius: 4,
-            background: "rgba(255,255,255,0.04)", color: "#4B5563",
-            border: "1px solid rgba(255,255,255,0.07)",
-          }}>{t}</span>
-        ))}
-      </div>
+// ─── Project Modal ────────────────────────────────────────────────────────────
+function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 200,
+        background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 24,
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 16 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "#0D1117",
+          border: `1px solid ${project.domainColor}40`,
+          borderRadius: 24,
+          padding: "40px 36px",
+          maxWidth: 520,
+          width: "100%",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: 2,
+          background: `linear-gradient(90deg, ${project.domainColor}, transparent)`,
+        }} />
+
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute", top: 20, right: 20,
+            background: "none", border: "none", cursor: "pointer",
+            color: "#4B5563", fontSize: 18, lineHeight: 1, padding: 4,
+            transition: "color 0.2s",
+          }}
+          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#9CA3AF")}
+          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#4B5563")}
+        >✕</button>
+
+        <span style={{
+          fontSize: 9, letterSpacing: "0.14em",
+          color: project.domainColor,
+          background: `${project.domainColor}18`,
+          border: `1px solid ${project.domainColor}30`,
+          padding: "3px 8px", borderRadius: 4,
+          display: "inline-block", marginBottom: 20,
+        }}>
+          {project.domain.toUpperCase()}
+        </span>
+
+        <div style={{ fontWeight: 700, fontSize: 28, color: "#F1F5F9", marginBottom: 16, letterSpacing: "-0.02em" }}>
+          {project.name}
+        </div>
+
+        <div style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.85, marginBottom: 28 }}>
+          {project.desc}
+        </div>
+
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
+          {project.tech.map((t) => (
+            <span key={t} style={{
+              fontSize: 11, padding: "5px 12px", borderRadius: 6,
+              background: "rgba(255,255,255,0.04)", color: "#6B7280",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}>{t}</span>
+          ))}
+        </div>
+
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          {project.github && (
+            <a href={project.github} target="_blank" rel="noopener noreferrer"
+              style={{
+                fontSize: 13, color: "#9CA3AF",
+                border: "1px solid rgba(255,255,255,0.1)",
+                padding: "10px 20px", borderRadius: 10,
+                textDecoration: "none", transition: "border-color 0.2s, color 0.2s",
+              }}
+              onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(255,255,255,0.22)"; el.style.color = "#E5E7EB"; }}
+              onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(255,255,255,0.1)"; el.style.color = "#9CA3AF"; }}
+            >↗ GitHub</a>
+          )}
+          {project.link && (
+            <a href={project.link} target="_blank" rel="noopener noreferrer"
+              style={{
+                fontSize: 13, color: "#08090F", fontWeight: 700,
+                background: project.domainColor, padding: "10px 20px", borderRadius: 10,
+                textDecoration: "none", transition: "opacity 0.2s",
+              }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = "1")}
+            >↗ Demo</a>
+          )}
+        </div>
+      </motion.div>
     </motion.div>
   );
 }
@@ -318,6 +415,14 @@ export default function Home() {
   const isMobile = useIsMobile();
   const title = useWordCycle(CYCLE_WORDS);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const copyEmail = () => {
+    navigator.clipboard.writeText("nabeelahmedkabir@gmail.com");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // Mouse-drag horizontal scroll
   useEffect(() => {
@@ -527,7 +632,7 @@ export default function Home() {
               scrollbarWidth: "none",
             }}
           >
-            {PROJECTS.map((p, i) => <ProjectCard key={p.name} project={p} index={i} />)}
+            {PROJECTS.map((p, i) => <ProjectCard key={p.name} project={p} index={i} onClick={() => setSelectedProject(p)} />)}
           </div>
           <div style={{ padding: `0 ${PAD}px`, marginTop: 8 }}>
             <span style={{ fontSize: 10, letterSpacing: "0.15em", color: "#374151" }}>← DRAG TO EXPLORE →</span>
@@ -569,7 +674,7 @@ export default function Home() {
                 { label: "DEGREE", value: "Computer Engineering" },
                 { label: "UNIVERSITY", value: "York University" },
                 { label: "STATUS", value: "3rd year, 2023–Present" },
-                { label: "CURRENTLY", value: "Building ai-debugger" },
+                { label: "CURRENTLY", value: "Building EvoCars" },
               ].map((item) => (
                 <div key={item.label}>
                   <div style={{ fontSize: 9, letterSpacing: "0.2em", color: "#374151", marginBottom: 8 }}>{item.label}</div>
@@ -684,8 +789,8 @@ export default function Home() {
                 <a
                   key={l.label}
                   href={l.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target={l.href.startsWith("mailto:") ? undefined : "_blank"}
+                  rel={l.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
                   style={{
                     fontSize: 13, color: "#9CA3AF",
                     border: "1px solid rgba(255,255,255,0.08)",
@@ -698,18 +803,20 @@ export default function Home() {
                   {l.label} ↗
                 </a>
               ))}
-              <a
-                href="mailto:nabeelahmedkabir@gmail.com"
+              <button
+                onClick={copyEmail}
                 style={{
                   fontSize: 13, color: "#08090F", fontWeight: 700,
-                  background: "#818CF8", padding: "11px 22px", borderRadius: 10,
-                  textDecoration: "none", transition: "opacity 0.2s",
+                  background: copied ? "#34D399" : "#818CF8",
+                  padding: "11px 22px", borderRadius: 10,
+                  border: "none", cursor: "pointer",
+                  transition: "background 0.3s, opacity 0.2s",
                 }}
                 onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
                 onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = "1")}
               >
-                Send Email →
-              </a>
+                {copied ? "Copied! ✓" : "Copy Email"}
+              </button>
             </div>
           </motion.div>
         </section>
@@ -730,6 +837,12 @@ export default function Home() {
         ::-webkit-scrollbar { display: none; }
         input::placeholder, textarea::placeholder { color: #374151; }
       `}</style>
+
+      <AnimatePresence>
+        {selectedProject && (
+          <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
+        )}
+      </AnimatePresence>
     </>
   );
 }
