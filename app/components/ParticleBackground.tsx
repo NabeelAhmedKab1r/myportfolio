@@ -10,8 +10,8 @@ type Particle = {
 };
 
 const PARTICLE_COUNT = 60;
-const MAX_DIST       = 130;
-const SPEED          = 0.3;
+const MAX_DIST       = 150;
+const SPEED          = 0.5;
 
 export default function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -53,7 +53,7 @@ export default function ParticleBackground() {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(45, 70, 110, 0.7)";
+        ctx.fillStyle = "rgba(100, 149, 220, 0.8)";
         ctx.fill();
       }
 
@@ -66,7 +66,7 @@ export default function ParticleBackground() {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(45, 70, 110, ${(1 - dist / MAX_DIST) * 0.35})`;
+            ctx.strokeStyle = `rgba(100, 149, 220, ${(1 - dist / MAX_DIST) * 0.5})`;
             ctx.lineWidth   = 0.8;
             ctx.stroke();
           }
@@ -91,7 +91,7 @@ export default function ParticleBackground() {
     <canvas
       ref={canvasRef}
       style={{
-        position: "absolute",
+        position: "fixed",
         inset: 0,
         pointerEvents: "none",
         zIndex: 0,
