@@ -136,16 +136,36 @@ const EDUCATION = [
   },
 ];
 
+const WORK_EXPERIENCE = [
+  {
+    title: "AI Software Developer Intern",
+    company: "Ivory Luxe Journeys (Cotriply)",
+    period: "April 2026 – Present",
+    tag: "Advance Ontario",
+    bullets: [
+      "Transitioning an AI-powered group travel coordination platform from prototype to MVP",
+      "Testing and documenting REST APIs to validate existing platform functionality",
+      "Implementing automation workflows to improve platform efficiency",
+      "Improving data handling processes to support AI-driven travel planning features",
+    ],
+  },
+];
+
 const SKILLS = [
   {
     label: "Languages",
     color: "#818CF8",
-    items: ["JavaScript", "TypeScript", "Python", "Java", "C", "Bash", "SQL", "HTML/CSS"],
+    items: ["Python", "JavaScript", "TypeScript", "Java", "C", "Bash", "SQL", "HTML/CSS"],
   },
   {
     label: "Frameworks & Tools",
     color: "#38BDF8",
-    items: ["React", "Flask", "Leaflet.js", "REST APIs", "Git", "Linux/Unix", "Microsoft Azure"],
+    items: ["React", "REST APIs", "Git", "Linux/Unix", "Microsoft Azure", "MongoDB", "MySQL", "pandas", "NumPy", "LLM APIs", "Claude Code"],
+  },
+  {
+    label: "Testing",
+    color: "#F472B6",
+    items: ["Jest", "pytest", "Randoop", "JUnit"],
   },
   {
     label: "Hardware & Systems",
@@ -181,7 +201,7 @@ function Sidebar() {
 
       {/* Nav */}
       <div style={{ display: "flex", flexDirection: "column", gap: 32, alignItems: "center" }}>
-        {[["Work", "work"], ["Projects", "projects"], ["About", "about"], ["Skills", "skills"], ["Contact", "contact"]].map(([label, id]) => (
+        {[["Work", "work"], ["Projects", "projects"], ["Experience", "experience"], ["About", "about"], ["Skills", "skills"], ["Contact", "contact"]].map(([label, id]) => (
           <a
             key={id}
             href={`#${id}`}
@@ -459,7 +479,7 @@ export default function Home() {
         }}>
           <span style={{ fontWeight: 900, fontSize: 13, color: "#818CF8" }}>NA</span>
           <div style={{ display: "flex", gap: 20 }}>
-            {[["Projects", "projects"], ["About", "about"], ["Skills", "skills"], ["Contact", "contact"]].map(([l, id]) => (
+            {[["Projects", "projects"], ["Experience", "experience"], ["About", "about"], ["Skills", "skills"], ["Contact", "contact"]].map(([l, id]) => (
               <a key={id} href={`#${id}`} style={{ fontSize: 11, color: "#6B7280", textDecoration: "none", letterSpacing: "0.06em" }}>{l}</a>
             ))}
           </div>
@@ -498,7 +518,7 @@ export default function Home() {
           }}
         >
           {!isMobile && (
-            <div style={{ position: "absolute", right: PAD, top: "50%", transform: "translateY(-50%)", opacity: 0.6, pointerEvents: "auto" }}>
+            <div style={{ position: "absolute", right: PAD, top: "50%", transform: "translateY(-50%)", opacity: 0.85, pointerEvents: "auto" }}>
               <DotGrid />
             </div>
           )}
@@ -546,8 +566,8 @@ export default function Home() {
             transition={{ delay: 0.85, duration: 0.6 }}
             style={{ fontSize: 15, color: "#6B7280", lineHeight: 1.85, maxWidth: 460, margin: "0 0 44px" }}
           >
-            Building at the intersection of hardware and software —
-            from RTL to production.
+            Software developer and AI enthusiast — building intelligent
+            systems from agentic workflows to the web.
           </motion.p>
 
           <motion.div
@@ -645,6 +665,51 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── EXPERIENCE ───────────────────────────────────────────────────── */}
+        <section id="experience" style={{ padding: `120px ${PAD}px`, position: "relative", zIndex: 1, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6 }}
+          >
+            <div style={{ fontSize: 10, letterSpacing: "0.25em", color: "#818CF8", marginBottom: 44, display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 28, height: 1, background: "#818CF8" }} />
+              03 — EXPERIENCE
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+              {WORK_EXPERIENCE.map((job, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                  style={{ display: "flex", gap: 28, maxWidth: 720 }}
+                >
+                  <div style={{ width: 2, flexShrink: 0, background: "linear-gradient(180deg, #818CF8, transparent)", borderRadius: 2, minHeight: 100 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 6 }}>
+                      <div style={{ fontWeight: 700, fontSize: 18, color: "#E5E7EB", letterSpacing: "-0.01em" }}>{job.title}</div>
+                      <span style={{
+                        fontSize: 9, letterSpacing: "0.14em", color: "#818CF8",
+                        background: "rgba(129,140,248,0.1)", border: "1px solid rgba(129,140,248,0.2)",
+                        padding: "3px 8px", borderRadius: 4, whiteSpace: "nowrap",
+                      }}>{job.tag}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: "#4B5563", marginBottom: 16 }}>{job.company} · {job.period}</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {job.bullets.map((b, j) => (
+                        <div key={j} style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.8 }}>· {b}</div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </section>
+
         {/* ── ABOUT (big type) ─────────────────────────────────────────────── */}
         <section id="about" style={{ padding: `120px ${PAD}px`, position: "relative", zIndex: 1, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
           <motion.div
@@ -655,7 +720,7 @@ export default function Home() {
           >
             <div style={{ fontSize: 10, letterSpacing: "0.25em", color: "#818CF8", marginBottom: 52, display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ width: 28, height: 1, background: "#818CF8" }} />
-              03 — ABOUT
+              04 — ABOUT
             </div>
 
             <div style={{ display: "flex", gap: 64, alignItems: "flex-start", flexDirection: isMobile ? "column" : "row" }}>
@@ -681,7 +746,7 @@ export default function Home() {
                     { label: "DEGREE", value: "Computer Engineering" },
                     { label: "UNIVERSITY", value: "York University" },
                     { label: "STATUS", value: "3rd year, 2023–Present" },
-                    { label: "CURRENTLY", value: "Building EvoCars" },
+                    { label: "CURRENTLY", value: "AI Dev Intern @ Cotriply" },
                   ].map((item) => (
                     <div key={item.label}>
                       <div style={{ fontSize: 9, letterSpacing: "0.2em", color: "#374151", marginBottom: 8 }}>{item.label}</div>
@@ -715,7 +780,7 @@ export default function Home() {
           >
             <div style={{ fontSize: 10, letterSpacing: "0.25em", color: "#818CF8", marginBottom: 44, display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ width: 28, height: 1, background: "#818CF8" }} />
-              04 — SKILLS
+              05 — SKILLS
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
               {SKILLS.map((group, i) => (
@@ -766,7 +831,7 @@ export default function Home() {
           >
             <div style={{ fontSize: 10, letterSpacing: "0.25em", color: "#818CF8", marginBottom: 44, display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ width: 28, height: 1, background: "#818CF8" }} />
-              05 — EDUCATION
+              06 — EDUCATION
             </div>
             {EDUCATION.map((e, i) => (
               <div key={i} style={{ display: "flex", gap: 28, maxWidth: 660 }}>
@@ -793,7 +858,7 @@ export default function Home() {
           >
             <div style={{ fontSize: 10, letterSpacing: "0.25em", color: "#818CF8", marginBottom: 44, display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ width: 28, height: 1, background: "#818CF8" }} />
-              06 — CONTACT
+              07 — CONTACT
             </div>
             <div style={{
               fontSize: isMobile ? "clamp(28px,8vw,36px)" : "clamp(32px,4vw,52px)",
@@ -802,7 +867,7 @@ export default function Home() {
               Let&apos;s work<br />together.
             </div>
             <div style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.85, marginBottom: 40, maxWidth: 440 }}>
-              Open to internships, collaborations, and interesting problems at the intersection of hardware and software.
+              Open to collaborations, new opportunities, and interesting problems in AI and software engineering.
             </div>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               {LINKS.map((l) => (

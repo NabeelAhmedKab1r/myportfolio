@@ -43,7 +43,7 @@ export default function DotGrid() {
 
           const intensity = ripple * 0.85 + wave * 0.15;
           const size = 1.2 + intensity * 2.8;
-          const alpha = 0.1 + intensity * 0.75;
+          const alpha = 0.2 + intensity * 0.9;
 
           ctx.beginPath();
           ctx.arc(x, y, size, 0, Math.PI * 2);
