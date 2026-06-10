@@ -231,7 +231,7 @@ const EDUCATION = [
 const WORK_EXPERIENCE = [
   {
     title: "AI Software Developer Intern",
-    company: "Ivory Luxe Journeys (Cotriply)",
+    company: "Cotriply",
     period: "April 2026 – Present",
     tag: "Advance Ontario",
     bullets: [
@@ -659,6 +659,7 @@ export default function Home() {
             cursor: "grab", scrollbarWidth: "none",
           }}>
             {PROJECTS.map((p, i) => <ProjectCard key={p.name} project={p} index={i} onClick={() => setSelectedProject(p)} />)}
+            <div style={{ flexShrink: 0, width: PAD }} />
           </div>
           <div style={{ padding: `0 ${PAD}px`, marginTop: 8 }}>
             <span style={{ fontSize: 10, letterSpacing: "0.15em", color: MUTED }}>← DRAG TO EXPLORE →</span>
