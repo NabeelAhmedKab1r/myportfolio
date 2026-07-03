@@ -9,7 +9,7 @@ const BG      = "#F5F0E8";
 const TEXT    = "#0A0A0A";
 const MUTED   = "#7A7A7A";
 const BORDER  = "#D4CFC4";
-const CARD_BG = "#FFFFFF";
+const CARD_BG = "#FAF7F2";
 const DISPLAY = "var(--font-display)";
 
 // ─── Word-cycle typewriter ────────────────────────────────────────────────────
@@ -239,6 +239,20 @@ const WORK_EXPERIENCE = [
       "Testing and documenting REST APIs to validate existing platform functionality",
       "Implementing automation workflows to improve platform efficiency",
       "Improving data handling processes to support AI-driven travel planning features",
+    ],
+  },
+];
+
+const HACKATHONS = [
+  {
+    name: "Comms-Denied Autonomy Hackathon",
+    org: "Red Team DefTech",
+    result: "3rd Place · $1,000",
+    tag: "3RD PLACE",
+    bullets: [
+      "Built a computer vision pipeline in Python and OpenCV for real-time object detection and classification using HSV color masking and contour analysis, enabling fully autonomous drone flight decisions.",
+      "Integrated Gemini API for AI-assisted decision-making alongside the OpenCV pipeline, combining rule-based vision with multimodal AI for improved reliability under varied conditions.",
+      "Collaborated with a 5-person team under a 9-hour constraint, owning the vision pipeline and decision-logic components.",
     ],
   },
 ];
@@ -653,13 +667,28 @@ export default function Home() {
             <div style={{ fontFamily: DISPLAY, fontSize: isMobile ? 40 : 60, fontWeight: 900, color: TEXT, letterSpacing: "-0.02em" }}>Selected Work</div>
           </motion.div>
 
-          <div ref={scrollRef} style={{
-            display: "flex", gap: 12, overflowX: "auto",
-            padding: `4px ${PAD}px 32px`, scrollSnapType: "x mandatory",
-            cursor: "grab", scrollbarWidth: "none",
-          }}>
-            {PROJECTS.map((p, i) => <ProjectCard key={p.name} project={p} index={i} onClick={() => setSelectedProject(p)} />)}
-            <div style={{ flexShrink: 0, width: PAD }} />
+          <div style={{ position: "relative" }}>
+            <div ref={scrollRef} style={{
+              display: "flex", gap: 12, overflowX: "auto",
+              padding: `4px 0 32px`, scrollSnapType: "x mandatory",
+              cursor: "grab", scrollbarWidth: "none",
+            }}>
+              <div style={{ flexShrink: 0, width: PAD }} />
+              {PROJECTS.map((p, i) => <ProjectCard key={p.name} project={p} index={i} onClick={() => setSelectedProject(p)} />)}
+              <div style={{ flexShrink: 0, width: PAD }} />
+            </div>
+            {/* left fade */}
+            <div style={{
+              position: "absolute", left: 0, top: 0, bottom: 0, width: PAD + 40,
+              background: `linear-gradient(to right, ${BG} 30%, transparent)`,
+              pointerEvents: "none",
+            }} />
+            {/* right fade */}
+            <div style={{
+              position: "absolute", right: 0, top: 0, bottom: 0, width: 80,
+              background: `linear-gradient(to left, ${BG} 20%, transparent)`,
+              pointerEvents: "none",
+            }} />
           </div>
           <div style={{ padding: `0 ${PAD}px`, marginTop: 8 }}>
             <span style={{ fontSize: 10, letterSpacing: "0.15em", color: MUTED }}>← DRAG TO EXPLORE →</span>
@@ -691,6 +720,30 @@ export default function Home() {
                   </div>
                 </motion.div>
               ))}
+            </div>
+            <div style={{ marginTop: 72 }}>
+              <div style={{ fontSize: 9, letterSpacing: "0.25em", color: MUTED, marginBottom: 32 }}>HACKATHONS</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 48 }}>
+                {HACKATHONS.map((h, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.4 }}
+                    style={{ display: "flex", gap: 28, maxWidth: 720 }}
+                  >
+                    <div style={{ width: 2, flexShrink: 0, background: `linear-gradient(180deg, ${ACCENT}, transparent)`, borderRadius: 2, minHeight: 100 }}/>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 6 }}>
+                        <div style={{ fontFamily: DISPLAY, fontWeight: 900, fontSize: 22, color: TEXT, letterSpacing: "-0.01em" }}>{h.name}</div>
+                        <span style={{ fontSize: 9, letterSpacing: "0.14em", color: ACCENT, border: `1px solid ${ACCENT}`, opacity: 0.7, padding: "3px 8px", borderRadius: 2, whiteSpace: "nowrap" }}>{h.tag}</span>
+                      </div>
+                      <div style={{ fontSize: 13, color: MUTED, marginBottom: 20 }}>{h.org} · {h.result}</div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        {h.bullets.map((b, j) => (
+                          <div key={j} style={{ fontSize: 13, color: MUTED, lineHeight: 1.8 }}>· {b}</div>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </motion.div>
         </section>
