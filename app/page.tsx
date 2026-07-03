@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import Lenis from "lenis";
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 const ACCENT  = "#C8522A";
@@ -471,6 +472,29 @@ export default function Home() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [copied, setCopied] = useState(false);
 
+  // Lenis smooth scroll
+  useEffect(() => {
+    const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+    let rafId: number;
+    const raf = (time: number) => { lenis.raf(time); rafId = requestAnimationFrame(raf); };
+    rafId = requestAnimationFrame(raf);
+    return () => { cancelAnimationFrame(rafId); lenis.destroy(); };
+  }, []);
+
+  // Mouse parallax values
+  const rawX = useMotionValue(0);
+  const rawY = useMotionValue(0);
+  const naX = useSpring(rawX, { stiffness: 30, damping: 15 });
+  const naY = useSpring(rawY, { stiffness: 30, damping: 15 });
+  const headX = useTransform(naX, (v) => v * 0.2);
+  const headY = useTransform(naY, (v) => v * 0.2);
+
+  const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const { innerWidth: w, innerHeight: h } = window;
+    rawX.set(((e.clientX - w / 2) / w) * 40);
+    rawY.set(((e.clientY - h / 2) / h) * 20);
+  }, [rawX, rawY]);
+
   const copyEmail = () => {
     navigator.clipboard.writeText("nabeelahmedkabir@gmail.com");
     setCopied(true);
@@ -531,7 +555,7 @@ export default function Home() {
       <div style={{ marginLeft: SIDEBAR_W, background: BG, minHeight: "100vh" }}>
 
         {/* ── HERO ─────────────────────────────────────────────────────────── */}
-        <section id="work" style={{
+        <section id="work" onMouseMove={handleHeroMouseMove} style={{
           minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center",
           padding: isMobile ? `${80 + 52}px 24px 60px` : `0 ${PAD}px`,
           position: "relative", overflow: "hidden",
@@ -539,13 +563,15 @@ export default function Home() {
 
           {/* Decorative ghost initials */}
           {!isMobile && (
-            <div style={{
-              position: "absolute", right: -24, top: "50%", transform: "translateY(-50%)",
-              fontFamily: DISPLAY, fontWeight: 900,
-              fontSize: "clamp(260px, 36vw, 480px)",
-              color: BORDER, letterSpacing: "-0.05em", lineHeight: 1,
-              userSelect: "none", pointerEvents: "none", opacity: 0.55, zIndex: 0,
-            }}>NA</div>
+            <div style={{ position: "absolute", right: -24, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", zIndex: 0 }}>
+              <motion.div style={{
+                fontFamily: DISPLAY, fontWeight: 900,
+                fontSize: "clamp(260px, 36vw, 480px)",
+                color: BORDER, letterSpacing: "-0.05em", lineHeight: 1,
+                userSelect: "none", opacity: 0.55,
+                x: naX, y: naY,
+              }}>NA</motion.div>
+            </div>
           )}
 
           <div style={{ position: "relative", zIndex: 1 }}>
@@ -583,6 +609,7 @@ export default function Home() {
                 fontSize: isMobile ? "clamp(72px,18vw,96px)" : "clamp(100px,13vw,172px)",
                 fontWeight: 900, lineHeight: 0.92, margin: 0,
                 color: TEXT, letterSpacing: "-0.025em",
+                x: headX, y: headY,
               }}
             >
               Nabeel<br />Ahmed Kabir
