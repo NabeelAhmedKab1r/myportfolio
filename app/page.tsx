@@ -1,48 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Lenis from "lenis";
+import ChipHero, { BG, ACCENT, INK, MUTED, MONO } from "./components/ChipHero";
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
-const ACCENT  = "#C8522A";
-const BG      = "#F5F0E8";
-const TEXT    = "#0A0A0A";
-const MUTED   = "#7A7A7A";
-const BORDER  = "#D4CFC4";
-const CARD_BG = "#FAF7F2";
+const BORDER  = "#DDD6CA";
 const DISPLAY = "var(--font-display)";
-
-// ─── Word-cycle typewriter ────────────────────────────────────────────────────
-const CYCLE_WORDS = ["SOFTWARE DEVELOPER", "AI DEVELOPER", "FULL-STACK BUILDER", "SYSTEMS ENGINEER"];
-
-function useWordCycle(words: string[], typingSpeed = 55, deleteSpeed = 35, pauseMs = 2200) {
-  const [displayed, setDisplayed] = useState("");
-  const [wordIndex, setWordIndex] = useState(0);
-  const [phase, setPhase] = useState<"typing" | "deleting">("typing");
-
-  useEffect(() => {
-    const word = words[wordIndex];
-    let timeout: ReturnType<typeof setTimeout>;
-    if (phase === "typing") {
-      if (displayed.length < word.length) {
-        timeout = setTimeout(() => setDisplayed(word.slice(0, displayed.length + 1)), typingSpeed);
-      } else {
-        timeout = setTimeout(() => setPhase("deleting"), pauseMs);
-      }
-    } else {
-      if (displayed.length > 0) {
-        timeout = setTimeout(() => setDisplayed(displayed.slice(0, -1)), deleteSpeed);
-      } else {
-        setWordIndex((i) => (i + 1) % words.length);
-        setPhase("typing");
-      }
-    }
-    return () => clearTimeout(timeout);
-  }, [displayed, phase, wordIndex, words, typingSpeed, deleteSpeed, pauseMs]);
-
-  return displayed;
-}
 
 // ─── Mobile hook ──────────────────────────────────────────────────────────────
 function useIsMobile(bp = 768) {
@@ -54,98 +19,6 @@ function useIsMobile(bp = 768) {
     return () => window.removeEventListener("resize", check);
   }, [bp]);
   return isMobile;
-}
-
-// ─── Scroll progress & active section ────────────────────────────────────────
-const SECTION_IDS = ["work", "projects", "experience", "about", "skills", "education", "contact"];
-
-function useScrollProgress() {
-  const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    const update = () => {
-      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-      setProgress(scrollTop / (scrollHeight - clientHeight));
-    };
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
-  }, []);
-  return progress;
-}
-
-function useActiveSection() {
-  const [active, setActive] = useState("work");
-  useEffect(() => {
-    const update = () => {
-      const scrollY = window.scrollY + window.innerHeight * 0.4;
-      for (let i = SECTION_IDS.length - 1; i >= 0; i--) {
-        const el = document.getElementById(SECTION_IDS[i]);
-        if (el && el.offsetTop <= scrollY) { setActive(SECTION_IDS[i]); break; }
-      }
-    };
-    window.addEventListener("scroll", update, { passive: true });
-    update();
-    return () => window.removeEventListener("scroll", update);
-  }, []);
-  return active;
-}
-
-// ─── Custom cursor (desktop only, no React re-renders) ────────────────────────
-function CustomCursor() {
-  const dotRef  = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!window.matchMedia("(pointer: fine)").matches) return;
-    const dot  = dotRef.current;
-    const ring = ringRef.current;
-    if (!dot || !ring) return;
-    const move = (e: MouseEvent) => {
-      dot.style.transform  = `translate(${e.clientX - 3}px, ${e.clientY - 3}px)`;
-      ring.style.transform = `translate(${e.clientX - 14}px, ${e.clientY - 14}px)`;
-    };
-    window.addEventListener("mousemove", move, { passive: true });
-    return () => window.removeEventListener("mousemove", move);
-  }, []);
-
-  return (
-    <>
-      <div ref={dotRef} style={{
-        position: "fixed", left: 0, top: 0, pointerEvents: "none", zIndex: 9999,
-        width: 6, height: 6, borderRadius: "50%", background: ACCENT,
-      }}/>
-      <div ref={ringRef} style={{
-        position: "fixed", left: 0, top: 0, pointerEvents: "none", zIndex: 9998,
-        width: 28, height: 28, borderRadius: "50%",
-        border: `1.5px solid ${ACCENT}`, opacity: 0.6,
-        transition: "transform 0.1s cubic-bezier(0.23, 1, 0.32, 1)",
-      }}/>
-    </>
-  );
-}
-
-// ─── Marquee ticker ───────────────────────────────────────────────────────────
-const TICKER = [
-  "AI DEVELOPER", "PYTHON", "NEURAL NETWORKS", "FPGA HARDWARE",
-  "REACT", "REST APIs", "YORK UNIVERSITY", "TORONTO CA",
-  "SYSTEMS THAT THINK", "CLAUDE CODE", "FULL-STACK BUILDER",
-];
-
-function MarqueeTicker() {
-  const doubled = [...TICKER, ...TICKER];
-  return (
-    <div style={{ overflow: "hidden", borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, padding: "13px 0", background: BG }}>
-      <div className="marquee-track" style={{ display: "flex", width: "max-content" }}>
-        {doubled.map((item, i) => (
-          <span key={i} style={{ display: "inline-flex", alignItems: "center" }}>
-            <span style={{ fontSize: 10, letterSpacing: "0.22em", color: MUTED, whiteSpace: "nowrap", padding: "0 20px" }}>
-              {item}
-            </span>
-            <span style={{ color: ACCENT, fontSize: 8, opacity: 0.5 }}>◆</span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -160,17 +33,25 @@ type Project = {
 
 const PROJECTS: Project[] = [
   {
+    name: "Distributed Task Queue",
+    domain: "Systems",
+    desc: "Fault-tolerant task queue in Go on Redis Streams — at-least-once delivery, atomic job claiming, crash recovery via XAUTOCLAIM, exponential-backoff retries, dead-lettering, and idempotency checks. Integration-tested against real Dockerized Redis/Postgres workers: high-priority jobs were claimed 2× faster (4.6s vs 11.7s avg wait).",
+    tech: ["Go", "Redis", "PostgreSQL", "Docker"],
+    link: "https://youtu.be/QtHd2Bimh4Q",
+    github: "https://github.com/NabeelAhmedKab1r/distributed-task-queue",
+  },
+  {
     name: "EvoCars",
     domain: "AI Systems",
-    desc: "Agents evolve to race autonomously via neural networks and genetic algorithms — fitness-based selection, mutation, and crossover over generations.",
-    tech: ["Python", "Neural Networks", "Genetic Algorithms"],
-    github: "https://github.com/NabeelAhmedKab1r/EvoCars",
+    desc: "Evolutionary AI racing simulator where neural-network-controlled agents learn to steer through a genetic algorithm (selection, crossover, mutation). Lap completion went from near 0% to 70%+ over 300 generations.",
+    tech: ["Python", "Pygame", "Neural Networks", "Genetic Algorithms"],
+    github: "https://github.com/NabeelAhmedKab1r/evocars",
   },
   {
     name: "FPGA VGA Snake",
     domain: "Hardware",
-    desc: "Snake game in Verilog on a DE10-Lite FPGA with VGA output at 640×480. Combinational and sequential logic for game state, rendering, and collision detection.",
-    tech: ["Verilog", "FPGA", "VGA", "RTL"],
+    desc: "Snake implemented entirely in hardware on a DE10-Lite FPGA — a multi-state FSM in Verilog with VGA signal generation and clock division for real-time rendering, plus wall/self collision, scoring, and debounced inputs.",
+    tech: ["Verilog", "Quartus Prime", "DE10-Lite", "VGA"],
     link: "https://youtu.be/ExPmekK-cnw",
     github: "https://github.com/NabeelAhmedKab1r/SnakeGame-FPGA-Project",
   },
@@ -212,19 +93,19 @@ const PROJECTS: Project[] = [
 ];
 
 const LINKS = [
-  { label: "GitHub",   short: "GH", href: "https://github.com/NabeelAhmedKab1r" },
-  { label: "LinkedIn", short: "LI", href: "https://www.linkedin.com/in/nabeelahmedkabir/" },
-  { label: "Email",    short: "EM", href: "mailto:nabeelahmedkabir@gmail.com" },
+  { label: "GitHub",   href: "https://github.com/NabeelAhmedKab1r" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/nabeelahmedkabir/" },
+  { label: "Email",    href: "mailto:nabeelahmedkabir@gmail.com" },
 ];
 
 const EDUCATION = [
   {
     degree: "Bachelor of Engineering",
     institution: "York University",
-    period: "2023 – Present",
+    period: "2023 – Apr 2028",
     details: [
-      "Third year — Computer Engineering",
-      "Relevant coursework: Data Structures & Algorithms, OOP, Operating Systems, Computer Networks",
+      "Computer Engineering — expected graduation April 2028",
+      "Coursework: Data Structures & Algorithms, Design & Analysis of Algorithms, Software Design, Operating Systems, Computer Networks, Computer Organization, Digital Logic Design",
     ],
   },
 ];
@@ -233,13 +114,14 @@ const WORK_EXPERIENCE = [
   {
     title: "AI Software Developer Intern",
     company: "Cotriply",
-    period: "April 2026 – Present",
+    period: "Apr 2026 – Jun 2026",
     tag: "Advance Ontario",
     bullets: [
-      "Transitioning an AI-powered group travel coordination platform from prototype to MVP",
-      "Testing and documenting REST APIs to validate existing platform functionality",
-      "Implementing automation workflows to improve platform efficiency",
-      "Improving data handling processes to support AI-driven travel planning features",
+      "Took an AI-powered group travel coordination platform from prototype to MVP",
+      "Refactored 16+ monolithic files (some 6,000+ lines) into modular TypeScript components, cutting codebase size by 50% with zero errors",
+      "Built an automated email notification system delivering real-time alerts across all core trip events, scaling to every member regardless of trip size",
+      "Configured a Vercel staging environment integrated with GitHub, decoupling development from the live platform",
+      "Resolved 10+ bugs across trip creation, UI overflow, poll logging, and itinerary auto-save via Postman API testing",
     ],
   },
 ];
@@ -251,213 +133,113 @@ const HACKATHONS = [
     result: "3rd Place · $1,000",
     tag: "3RD PLACE",
     bullets: [
-      "Built a computer vision pipeline in Python and OpenCV for real-time object detection and classification using HSV color masking and contour analysis, enabling fully autonomous drone flight decisions.",
-      "Integrated Gemini API for AI-assisted decision-making alongside the OpenCV pipeline, combining rule-based vision with multimodal AI for improved reliability under varied conditions.",
-      "Collaborated with a 5-person team under a 9-hour constraint, owning the vision pipeline and decision-logic components.",
+      "Built a fully autonomous drone navigation system in Python and OpenCV that reads visual cues for real-time flight decisions — no human input, no GPS.",
+      "Designed a computer vision pipeline using HSV color masking and contour analysis to detect and classify objects, replacing an unreliable LLM-based approach for better speed and reliability.",
+      "Owned the vision pipeline and decision logic on a 5-person team under a 9-hour constraint; placed 3rd of 10 teams.",
     ],
   },
 ];
 
 const SKILLS = [
-  { label: "Languages",         items: ["Python", "JavaScript", "TypeScript", "Java", "C", "Bash", "SQL", "HTML/CSS"] },
-  { label: "Frameworks & Tools",items: ["React", "REST APIs", "Git", "Linux/Unix", "Microsoft Azure", "MongoDB", "MySQL", "pandas", "NumPy", "LLM APIs", "Claude Code"] },
-  { label: "Testing",           items: ["Jest", "pytest", "Randoop", "JUnit"] },
-  { label: "Hardware & Systems",items: ["Verilog", "FPGA", "Embedded Systems", "RTL Design"] },
+  { label: "Languages",            items: ["Python", "JavaScript", "TypeScript", "Go", "Java", "C", "SQL", "HTML5/CSS3", "Bash", "Verilog"] },
+  { label: "Developer Tools",      items: ["Git", "GitHub", "VS Code", "Docker", "Postman", "Microsoft Azure", "Vercel", "Linux/Unix", "Spring Boot", "Claude Code", "Quartus Prime"] },
+  { label: "Libraries/Frameworks", items: ["React", "OpenCV", "pandas", "NumPy", "scikit-learn", "Leaflet.js", "Redis", "MySQL", "PostgreSQL", "MongoDB"] },
+  { label: "Core Competencies",    items: ["OOP", "REST APIs", "JUnit", "CI/CD", "Agile/Scrum", "Prompt Engineering", "LLM Integration", "Agentic Workflows"] },
 ];
 
-// ─── Section label ────────────────────────────────────────────────────────────
-function SectionLabel({ num, label, light }: { num: string; label: string; light?: boolean }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 40 }}>
-      <span style={{ fontFamily: DISPLAY, fontWeight: 900, fontSize: 11, letterSpacing: "0.25em", color: light ? "rgba(245,240,232,0.55)" : ACCENT }}>{num}</span>
-      <div style={{ flex: 1, height: 1, background: light ? "rgba(245,240,232,0.2)" : BORDER }} />
-      <span style={{ fontSize: 9, letterSpacing: "0.25em", color: light ? "rgba(245,240,232,0.45)" : MUTED }}>{label}</span>
-    </div>
-  );
-}
+const NAV = [["Projects", "projects"], ["Experience", "experience"], ["About", "about"], ["Contact", "contact"]];
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
-function Sidebar({ activeSection }: { activeSection: string }) {
-  return (
-    <motion.aside
-      initial={{ opacity: 0, x: -16 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      style={{
-        position: "fixed", left: 0, top: 0, bottom: 0, width: 64,
-        borderRight: `1px solid ${BORDER}`,
-        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between",
-        padding: "24px 0", zIndex: 100, background: BG,
-      }}
-    >
-      <div style={{ fontFamily: DISPLAY, fontWeight: 900, fontSize: 14, color: ACCENT, letterSpacing: "0.02em" }}>NA</div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 32, alignItems: "center" }}>
-        {[["Work", "work"], ["Projects", "projects"], ["Experience", "experience"], ["About", "about"], ["Skills", "skills"], ["Contact", "contact"]].map(([label, id]) => {
-          const isActive = activeSection === id;
-          return (
-            <a key={id} href={`#${id}`} style={{
-              fontSize: 9, letterSpacing: "0.2em",
-              color: isActive ? ACCENT : MUTED,
-              textDecoration: "none", writingMode: "vertical-rl",
-              transform: "rotate(180deg)", transition: "color 0.2s", userSelect: "none",
-              fontWeight: isActive ? 700 : 400,
-            }}
-              onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.color = TEXT; }}
-              onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.color = MUTED; }}
-            >{label.toUpperCase()}</a>
-          );
-        })}
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "center" }}>
-        {LINKS.map((l) => (
-          <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer" title={l.label}
-            style={{ fontSize: 9, letterSpacing: "0.1em", color: MUTED, textDecoration: "none", transition: "color 0.2s", writingMode: "vertical-rl" }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = ACCENT)}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = MUTED)}
-          >{l.short}</a>
-        ))}
-      </div>
-    </motion.aside>
-  );
-}
-
-// ─── Project card ─────────────────────────────────────────────────────────────
-function ProjectCard({ project, index, onClick }: { project: Project; index: number; onClick: () => void }) {
-  const [hovered, setHovered] = useState(false);
+// ─── Section header ───────────────────────────────────────────────────────────
+function SectionHead({ num, title, note, isMobile }: { num: string; title: string; note?: React.ReactNode; isMobile: boolean }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.05, duration: 0.4 }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onClick={onClick}
-      style={{
-        flexShrink: 0, width: 280,
-        background: CARD_BG,
-        border: `1px solid ${hovered ? TEXT : BORDER}`,
-        borderTop: `2px solid ${hovered ? ACCENT : BORDER}`,
-        borderRadius: 4, padding: "24px 20px",
-        scrollSnapAlign: "start",
-        display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 16,
-        transition: "border-color 0.2s, border-top-color 0.2s",
-        cursor: "none",
-      }}
+      initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      style={{ marginBottom: isMobile ? 36 : 56 }}
     >
-      <div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-          <span style={{ fontSize: 9, letterSpacing: "0.14em", color: MUTED, border: `1px solid ${BORDER}`, padding: "3px 8px", borderRadius: 2 }}>
-            {project.domain.toUpperCase()}
-          </span>
-          <div style={{ display: "flex", gap: 10 }}>
-            {project.github && (
-              <a href={project.github} target="_blank" rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                style={{ fontSize: 11, color: MUTED, textDecoration: "none", transition: "color 0.2s" }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = ACCENT)}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = MUTED)}
-              >↗ repo</a>
-            )}
-            {project.link && (
-              <a href={project.link} target="_blank" rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                style={{ fontSize: 11, color: ACCENT, textDecoration: "none", transition: "opacity 0.2s" }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = "0.7")}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = "1")}
-              >↗ demo</a>
-            )}
-          </div>
-        </div>
-        <div style={{ fontFamily: DISPLAY, fontWeight: 900, fontSize: 22, color: TEXT, letterSpacing: "-0.01em" }}>
-          {project.name}
-        </div>
-        <div style={{
-          overflow: "hidden",
-          maxHeight: hovered ? 72 : 0,
-          opacity: hovered ? 1 : 0,
-          transition: "max-height 0.35s ease, opacity 0.25s ease",
-        }}>
-          <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.65, paddingTop: 10 }}>
-            {project.desc}
-          </div>
-        </div>
+      <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.18em", color: MUTED, marginBottom: 14 }}>
+        <span style={{ color: ACCENT }}>{num}</span> / {title.toUpperCase()}
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "flex-end", gap: 24, flexDirection: isMobile ? "column" : "row" }}>
+        <h2 style={{ fontFamily: DISPLAY, fontWeight: 900, fontSize: isMobile ? 56 : "clamp(72px, 8vw, 112px)", lineHeight: 0.9, letterSpacing: "-0.01em", margin: 0, color: INK, textTransform: "uppercase" }}>
+          {title}
+        </h2>
+        {note && (
+          <div style={{ fontSize: 14, lineHeight: 1.6, color: INK, maxWidth: 320, textAlign: isMobile ? "left" : "right", paddingBottom: 6 }}>{note}</div>
+        )}
       </div>
     </motion.div>
   );
 }
 
-// ─── Project Modal ────────────────────────────────────────────────────────────
-function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
-
+// ─── Project row ──────────────────────────────────────────────────────────────
+function ProjectRow({ project, index, open, onToggle, isMobile }: { project: Project; index: number; open: boolean; onToggle: () => void; isMobile: boolean }) {
   return (
     <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.15 }}
-      onClick={onClose}
-      style={{
-        position: "fixed", inset: 0, zIndex: 200,
-        background: "rgba(10,10,10,0.45)", backdropFilter: "blur(4px)",
-        display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
-      }}
+      initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }} transition={{ delay: index * 0.04, duration: 0.45 }}
+      className={`row ${open ? "open" : ""}`}
+      style={{ borderTop: `1px solid ${BORDER}` }}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: CARD_BG, border: `1px solid ${BORDER}`, borderTop: `3px solid ${ACCENT}`,
-          borderRadius: 4, padding: "40px 36px", maxWidth: 520, width: "100%", position: "relative",
-        }}
-      >
-        <button onClick={onClose} style={{
-          position: "absolute", top: 20, right: 20,
-          background: "none", border: "none", color: MUTED, fontSize: 18, lineHeight: 1, padding: 4,
-          transition: "color 0.2s", cursor: "none",
-        }}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = TEXT)}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = MUTED)}
-        >✕</button>
-
-        <span style={{
-          fontSize: 9, letterSpacing: "0.14em", color: MUTED,
-          border: `1px solid ${BORDER}`, padding: "3px 8px", borderRadius: 2,
-          display: "inline-block", marginBottom: 20,
-        }}>{project.domain.toUpperCase()}</span>
-
-        <div style={{ fontFamily: DISPLAY, fontWeight: 900, fontSize: 32, color: TEXT, marginBottom: 16, letterSpacing: "-0.02em" }}>
+      <button onClick={onToggle} aria-expanded={open} style={{
+        all: "unset", boxSizing: "border-box", width: "100%", cursor: "pointer",
+        display: "grid", alignItems: "baseline", padding: isMobile ? "20px 0" : "26px 0",
+        gridTemplateColumns: isMobile ? "36px 1fr 20px" : "64px 1fr 200px 32px",
+      }}>
+        <span className="row-idx" style={{ fontFamily: MONO, fontSize: 12, color: MUTED }}>{String(index + 1).padStart(2, "0")}</span>
+        <span className="row-name" style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: isMobile ? 28 : 40, color: INK, textTransform: "uppercase", letterSpacing: "0.005em", lineHeight: 1 }}>
           {project.name}
+        </span>
+        {!isMobile && <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.12em", color: MUTED }}>{project.domain.toUpperCase()}</span>}
+        <span className="row-plus" style={{ fontFamily: MONO, fontSize: 18, color: MUTED, textAlign: "right" }}>+</span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            style={{ overflow: "hidden" }}
+          >
+            <div style={{ paddingLeft: isMobile ? 36 : 64, paddingBottom: 28, display: "flex", gap: isMobile ? 18 : 48, flexDirection: isMobile ? "column" : "row", alignItems: "flex-start" }}>
+              <p style={{ margin: 0, fontSize: 15, lineHeight: 1.75, color: "#4A4640", maxWidth: 560, flex: 1 }}>{project.desc}</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 200 }}>
+                <div style={{ fontFamily: MONO, fontSize: 11, color: MUTED, lineHeight: 1.9 }}>{project.tech.join(" · ")}</div>
+                <div style={{ display: "flex", gap: 18 }}>
+                  {project.github && <a className="ulink" href={project.github} target="_blank" rel="noopener noreferrer">Repo ↗</a>}
+                  {project.link && <a className="ulink" href={project.link} target="_blank" rel="noopener noreferrer">Demo ↗</a>}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+// ─── Timeline entry (work + hackathons) ───────────────────────────────────────
+function Entry({ when, title, sub, tag, bullets, isMobile }: { when: string; title: string; sub: string; tag: string; bullets: string[]; isMobile: boolean }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.5 }}
+      style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "240px 1fr", gap: isMobile ? 10 : 40, padding: "32px 0", borderTop: `1px solid ${BORDER}` }}
+    >
+      <div style={{ fontFamily: MONO, fontSize: 12, color: MUTED, letterSpacing: "0.04em" }}>{when}</div>
+      <div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 14, flexWrap: "wrap", marginBottom: 4 }}>
+          <span style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: isMobile ? 26 : 32, color: INK, textTransform: "uppercase", lineHeight: 1.05 }}>{title}</span>
+          <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.14em", color: ACCENT }}>{tag.toUpperCase()}</span>
         </div>
-        <div style={{ fontSize: 14, color: MUTED, lineHeight: 1.85, marginBottom: 28 }}>{project.desc}</div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
-          {project.tech.map((t) => (
-            <span key={t} style={{ fontSize: 11, padding: "5px 12px", borderRadius: 3, background: BG, color: MUTED, border: `1px solid ${BORDER}` }}>{t}</span>
+        <div style={{ fontSize: 14, color: MUTED, marginBottom: 18 }}>{sub}</div>
+        <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10, maxWidth: 680 }}>
+          {bullets.map((b, j) => (
+            <li key={j} style={{ fontSize: 14, lineHeight: 1.7, color: "#4A4640", display: "flex", gap: 12 }}>
+              <span style={{ color: ACCENT, fontFamily: MONO }}>—</span>{b}
+            </li>
           ))}
-        </div>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          {project.github && (
-            <a href={project.github} target="_blank" rel="noopener noreferrer"
-              style={{ fontSize: 13, color: MUTED, border: `1px solid ${BORDER}`, padding: "10px 20px", borderRadius: 4, textDecoration: "none", transition: "border-color 0.2s, color 0.2s" }}
-              onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = TEXT; el.style.color = TEXT; }}
-              onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = BORDER; el.style.color = MUTED; }}
-            >↗ GitHub</a>
-          )}
-          {project.link && (
-            <a href={project.link} target="_blank" rel="noopener noreferrer"
-              style={{ fontSize: 13, color: "#FFF", fontWeight: 700, background: ACCENT, padding: "10px 20px", borderRadius: 4, textDecoration: "none", transition: "opacity 0.2s" }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = "1")}
-            >↗ Demo</a>
-          )}
-        </div>
-      </motion.div>
+        </ul>
+      </div>
     </motion.div>
   );
 }
@@ -465,35 +247,38 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Home() {
   const isMobile = useIsMobile();
-  const title = useWordCycle(CYCLE_WORDS);
-  const progress = useScrollProgress();
-  const activeSection = useActiveSection();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [openProject, setOpenProject] = useState<number | null>(0);
   const [copied, setCopied] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+  const lenisRef = useRef<Lenis | null>(null);
 
   // Lenis smooth scroll
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+    lenisRef.current = lenis;
     let rafId: number;
     const raf = (time: number) => { lenis.raf(time); rafId = requestAnimationFrame(raf); };
     rafId = requestAnimationFrame(raf);
-    return () => { cancelAnimationFrame(rafId); lenis.destroy(); };
+    return () => { cancelAnimationFrame(rafId); lenis.destroy(); lenisRef.current = null; };
   }, []);
 
-  // Mouse parallax values
-  const rawX = useMotionValue(0);
-  const rawY = useMotionValue(0);
-  const naX = useSpring(rawX, { stiffness: 30, damping: 15 });
-  const naY = useSpring(rawY, { stiffness: 30, damping: 15 });
-  const headX = useTransform(naX, (v) => v * 0.2);
-  const headY = useTransform(naY, (v) => v * 0.2);
+  // Nav only appears once the zoom lands on the die
+  const onHeroProgress = useCallback((t: number) => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const visible = t > 0.9;
+    nav.style.opacity = visible ? "1" : "0";
+    nav.style.transform = visible ? "translateY(0)" : "translateY(-8px)";
+    nav.style.pointerEvents = visible ? "auto" : "none";
+  }, []);
 
-  const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    const { innerWidth: w, innerHeight: h } = window;
-    rawX.set(((e.clientX - w / 2) / w) * 40);
-    rawY.set(((e.clientY - h / 2) / h) * 20);
-  }, [rawX, rawY]);
+  const goTo = (id: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (lenisRef.current) lenisRef.current.scrollTo(el, { offset: id === "top" ? 0 : -24 });
+    else el.scrollIntoView({ behavior: "smooth" });
+  };
 
   const copyEmail = () => {
     navigator.clipboard.writeText("nabeelahmedkabir@gmail.com");
@@ -501,456 +286,201 @@ export default function Home() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    let isDown = false, startX = 0, scrollLeft = 0;
-    const onDown = (e: MouseEvent) => { isDown = true; startX = e.pageX - el.offsetLeft; scrollLeft = el.scrollLeft; el.style.cursor = "grabbing"; };
-    const onUp = () => { isDown = false; el.style.cursor = "grab"; };
-    const onMove = (e: MouseEvent) => { if (!isDown) return; e.preventDefault(); el.scrollLeft = scrollLeft - (e.pageX - el.offsetLeft - startX); };
-    el.addEventListener("mousedown", onDown);
-    window.addEventListener("mouseup", onUp);
-    el.addEventListener("mousemove", onMove);
-    return () => { el.removeEventListener("mousedown", onDown); window.removeEventListener("mouseup", onUp); el.removeEventListener("mousemove", onMove); };
-  }, []);
-
-  const SIDEBAR_W = isMobile ? 0 : 64;
-  const PAD = isMobile ? 24 : 88;
+  const PAD = isMobile ? 20 : 64;
+  const section = (extra?: React.CSSProperties): React.CSSProperties => ({
+    padding: `${isMobile ? 96 : 160}px ${PAD}px 0`, maxWidth: 1280, margin: "0 auto", ...extra,
+  });
 
   return (
     <>
-      <CustomCursor />
+      {/* ── NAV ──────────────────────────────────────────────────────────── */}
+      <nav ref={navRef} style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: isMobile ? "16px 20px" : "22px 64px",
+        fontFamily: MONO, fontSize: 11, letterSpacing: "0.14em",
+        opacity: 0, pointerEvents: "none", transition: "opacity 0.4s, transform 0.4s",
+        background: `linear-gradient(${BG} 40%, rgba(247,243,236,0))`,
+      }}>
+        <a href="#top" onClick={goTo("top")} className="nav-link" style={{ color: INK }}>NAK-01</a>
+        <div style={{ display: "flex", gap: isMobile ? 14 : 32 }}>
+          {NAV.filter(([, id]) => !isMobile || id !== "experience").map(([label, id]) => (
+            <a key={id} href={`#${id}`} onClick={goTo(id)} className="nav-link">{label.toUpperCase()}</a>
+          ))}
+        </div>
+      </nav>
 
-      {/* Scroll progress bar */}
-      <div style={{
-        position: "fixed", top: 0, left: isMobile ? 0 : 64, right: 0,
-        height: 2, background: ACCENT, zIndex: 9996, pointerEvents: "none",
-        transform: `scaleX(${progress})`, transformOrigin: "left",
-      }}/>
-
-      {/* Film grain */}
-      <div className="grain" style={{
-        position: "fixed", inset: "-50%", width: "200%", height: "200%",
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")`,
-        opacity: 0.045, pointerEvents: "none", zIndex: 997,
-      }}/>
-
-      {!isMobile && <Sidebar activeSection={activeSection} />}
-
-      {isMobile && (
+      {/* ── HERO: zoom into the chip ─────────────────────────────────────── */}
+      <ChipHero onProgress={onHeroProgress}>
         <div style={{
-          position: "fixed", top: 0, left: 0, right: 0, height: 52, zIndex: 100,
-          background: BG, borderBottom: `1px solid ${BORDER}`,
-          display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px",
+          height: "100%", display: "flex", flexDirection: "column", justifyContent: "center",
+          padding: `0 ${PAD}px`, maxWidth: 1280, margin: "0 auto",
         }}>
-          <span style={{ fontFamily: DISPLAY, fontWeight: 900, fontSize: 14, color: ACCENT }}>NA</span>
-          <div style={{ display: "flex", gap: 20 }}>
-            {[["Projects", "projects"], ["Experience", "experience"], ["About", "about"], ["Skills", "skills"], ["Contact", "contact"]].map(([l, id]) => (
-              <a key={id} href={`#${id}`} style={{ fontSize: 11, color: MUTED, textDecoration: "none", letterSpacing: "0.06em" }}>{l}</a>
-            ))}
+          <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.2em", color: MUTED, marginBottom: 22 }}>
+            <span style={{ color: ACCENT }}>●</span>&nbsp; COMPUTER ENGINEERING · TORONTO
+          </div>
+          <h1 style={{
+            fontFamily: DISPLAY, fontWeight: 900, margin: 0, color: INK, textTransform: "uppercase",
+            fontSize: isMobile ? "clamp(64px, 19vw, 96px)" : "clamp(96px, 12.5vw, 188px)",
+            lineHeight: 0.86, letterSpacing: "-0.01em",
+          }}>
+            Nabeel<br />Ahmed Kabir
+          </h1>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "flex-end", gap: 28, marginTop: isMobile ? 28 : 40, flexDirection: isMobile ? "column" : "row" }}>
+            <p style={{ margin: 0, fontSize: isMobile ? 15 : 17, lineHeight: 1.6, color: "#4A4640", maxWidth: 440 }}>
+              I build systems that think — from neural nets and agentic workflows
+              down to the logic gates. Most recently an AI software developer intern at <span style={{ color: INK }}>Cotriply</span>.
+            </p>
+            <div style={{ display: "flex", gap: 12 }}>
+              <a href="#projects" onClick={goTo("projects")} className="btn btn-solid">View work</a>
+              <a href="/resume.pdf" download className="btn">Resume ↓</a>
+            </div>
           </div>
         </div>
-      )}
+      </ChipHero>
 
-      <div style={{ marginLeft: SIDEBAR_W, background: BG, minHeight: "100vh" }}>
-
-        {/* ── HERO ─────────────────────────────────────────────────────────── */}
-        <section id="work" onMouseMove={handleHeroMouseMove} style={{
-          minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center",
-          padding: isMobile ? `${80 + 52}px 24px 60px` : `0 ${PAD}px`,
-          position: "relative", overflow: "hidden",
-        }}>
-
-          {/* Decorative ghost initials */}
-          {!isMobile && (
-            <div style={{ position: "absolute", right: -24, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", zIndex: 0 }}>
-              <motion.div style={{
-                fontFamily: DISPLAY, fontWeight: 900,
-                fontSize: "clamp(260px, 36vw, 480px)",
-                color: BORDER, letterSpacing: "-0.05em", lineHeight: 1,
-                userSelect: "none", opacity: 0.55,
-                x: naX, y: naY,
-              }}>NA</motion.div>
-            </div>
-          )}
-
-          <div style={{ position: "relative", zIndex: 1 }}>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.5 }}
-              style={{ fontSize: 10, letterSpacing: "0.3em", color: ACCENT, marginBottom: 20, display: "flex", alignItems: "center", gap: 16 }}
-            >
-              01 — PORTFOLIO
-              <div style={{ width: 48, height: 1, background: BORDER }} />
-            </motion.div>
-
-            {/* Bold opening statement */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.6 }}
-              style={{
-                fontFamily: DISPLAY, fontWeight: 700,
-                fontSize: isMobile ? 18 : 22,
-                color: MUTED, letterSpacing: "0.01em", marginBottom: 12,
-                fontStyle: "italic",
-              }}
-            >
-              I build systems that think.
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                fontFamily: DISPLAY,
-                fontSize: isMobile ? "clamp(72px,18vw,96px)" : "clamp(100px,13vw,172px)",
-                fontWeight: 900, lineHeight: 0.92, margin: 0,
-                color: TEXT, letterSpacing: "-0.025em",
-                x: headX, y: headY,
-              }}
-            >
-              Nabeel<br />Ahmed Kabir
-            </motion.h1>
-
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ delay: 0.5, duration: 0.5, ease: "easeOut" }}
-              style={{ height: 1, background: BORDER, margin: "32px 0", transformOrigin: "left" }}
-            />
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.65, duration: 0.5 }}
-              style={{ display: "flex", gap: isMobile ? 28 : 72, alignItems: "flex-start", flexDirection: isMobile ? "column" : "row" }}
-            >
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, letterSpacing: "0.2em", color: ACCENT, marginBottom: 18, height: 18 }}>
-                  {title}<span className="cursor-blink">_</span>
-                </div>
-                <p style={{ fontSize: 15, color: MUTED, lineHeight: 1.85, maxWidth: 400, margin: "0 0 36px" }}>
-                  Software developer and AI enthusiast — building intelligent
-                  systems from agentic workflows to the web.
-                </p>
-                <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-                  <a href="#projects" style={{
-                    fontSize: 13, color: "#FFF", fontWeight: 700,
-                    background: ACCENT, padding: "11px 26px", borderRadius: 4,
-                    textDecoration: "none", transition: "opacity 0.2s", letterSpacing: "0.01em",
-                  }}
-                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
-                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = "1")}
-                  >View Projects</a>
-                  <a href="/resume.pdf" download style={{
-                    fontSize: 13, color: MUTED, border: `1px solid ${BORDER}`,
-                    padding: "11px 26px", borderRadius: 4, textDecoration: "none", transition: "border-color 0.2s, color 0.2s",
-                  }}
-                    onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = TEXT; el.style.color = TEXT; }}
-                    onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = BORDER; el.style.color = MUTED; }}
-                  >Resume ↓</a>
-                </div>
-              </div>
-
-              {!isMobile && (
-                <div style={{ flexShrink: 0, display: "flex", flexDirection: "column" }}>
-                  {[
-                    { label: "LOCATION",   value: "Toronto, CA" },
-                    { label: "DEGREE",     value: "Computer Engineering" },
-                    { label: "UNIVERSITY", value: "York University" },
-                    { label: "STATUS",     value: "Year 3 · 2023–Present" },
-                  ].map((item) => (
-                    <div key={item.label} style={{ borderBottom: `1px solid ${BORDER}`, padding: "16px 0", minWidth: 200 }}>
-                      <div style={{ fontSize: 9, letterSpacing: "0.2em", color: MUTED, marginBottom: 6 }}>{item.label}</div>
-                      <div style={{ fontSize: 14, color: TEXT }}>{item.value}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          </div>
-
-          {!isMobile && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6, duration: 0.5 }}
-              style={{ position: "absolute", bottom: 36, left: PAD, display: "flex", alignItems: "center", gap: 12, fontSize: 9, letterSpacing: "0.25em", color: MUTED }}
-            >
-              <div style={{ width: 32, height: 1, background: BORDER }} />SCROLL
-            </motion.div>
-          )}
-        </section>
-
-        {/* ── MARQUEE ───────────────────────────────────────────────────────── */}
-        <MarqueeTicker />
+      <main style={{ background: BG, position: "relative", zIndex: 1 }}>
 
         {/* ── PROJECTS ─────────────────────────────────────────────────────── */}
-        <section id="projects" style={{ padding: "120px 0", position: "relative", borderTop: `1px solid ${BORDER}` }}>
-          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.5 }}
-            style={{ padding: `0 ${PAD}px`, marginBottom: 44 }}
-          >
-            <SectionLabel num="02" label="PROJECTS" />
-            <div style={{ fontFamily: DISPLAY, fontSize: isMobile ? 40 : 60, fontWeight: 900, color: TEXT, letterSpacing: "-0.02em" }}>Selected Work</div>
-          </motion.div>
-
-          <div style={{ position: "relative" }}>
-            <div ref={scrollRef} style={{
-              display: "flex", gap: 12, overflowX: "auto",
-              padding: `4px 0 32px`, scrollSnapType: "x mandatory",
-              cursor: "grab", scrollbarWidth: "none",
-            }}>
-              <div style={{ flexShrink: 0, width: PAD }} />
-              {PROJECTS.map((p, i) => <ProjectCard key={p.name} project={p} index={i} onClick={() => setSelectedProject(p)} />)}
-              <div style={{ flexShrink: 0, width: PAD }} />
-            </div>
-            {/* left fade */}
-            <div style={{
-              position: "absolute", left: 0, top: 0, bottom: 0, width: PAD + 40,
-              background: `linear-gradient(to right, ${BG} 30%, transparent)`,
-              pointerEvents: "none",
-            }} />
-            {/* right fade */}
-            <div style={{
-              position: "absolute", right: 0, top: 0, bottom: 0, width: 80,
-              background: `linear-gradient(to left, ${BG} 20%, transparent)`,
-              pointerEvents: "none",
-            }} />
-          </div>
-          <div style={{ padding: `0 ${PAD}px`, marginTop: 8 }}>
-            <span style={{ fontSize: 10, letterSpacing: "0.15em", color: MUTED }}>← DRAG TO EXPLORE →</span>
+        <section id="projects" style={section({ paddingTop: isMobile ? 64 : 96 })}>
+          <SectionHead num="01" title="Projects" isMobile={isMobile}
+            note={<><span className="ulink-static">3rd place, Red Team DefTech</span>. I like building things that sit between hardware and software.</>}
+          />
+          <div style={{ borderBottom: `1px solid ${BORDER}` }}>
+            {PROJECTS.map((p, i) => (
+              <ProjectRow key={p.name} project={p} index={i} isMobile={isMobile}
+                open={openProject === i} onToggle={() => setOpenProject(openProject === i ? null : i)}
+              />
+            ))}
           </div>
         </section>
 
         {/* ── EXPERIENCE ───────────────────────────────────────────────────── */}
-        <section id="experience" style={{ padding: `120px ${PAD}px`, position: "relative", borderTop: `1px solid ${BORDER}` }}>
-          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.5 }}>
-            <SectionLabel num="03" label="EXPERIENCE" />
-            <div style={{ fontFamily: DISPLAY, fontSize: isMobile ? 40 : 60, fontWeight: 900, color: TEXT, letterSpacing: "-0.02em", marginBottom: 56 }}>Work</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 48 }}>
-              {WORK_EXPERIENCE.map((job, i) => (
-                <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.4 }}
-                  style={{ display: "flex", gap: 28, maxWidth: 720 }}
-                >
-                  <div style={{ width: 2, flexShrink: 0, background: `linear-gradient(180deg, ${ACCENT}, transparent)`, borderRadius: 2, minHeight: 100 }}/>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 6 }}>
-                      <div style={{ fontFamily: DISPLAY, fontWeight: 900, fontSize: 22, color: TEXT, letterSpacing: "-0.01em" }}>{job.title}</div>
-                      <span style={{ fontSize: 9, letterSpacing: "0.14em", color: ACCENT, border: `1px solid ${ACCENT}`, opacity: 0.7, padding: "3px 8px", borderRadius: 2, whiteSpace: "nowrap" }}>{job.tag}</span>
-                    </div>
-                    <div style={{ fontSize: 13, color: MUTED, marginBottom: 20 }}>{job.company} · {job.period}</div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                      {job.bullets.map((b, j) => (
-                        <div key={j} style={{ fontSize: 13, color: MUTED, lineHeight: 1.8 }}>· {b}</div>
-                      ))}
-                    </div>
+        <section id="experience" style={section()}>
+          <SectionHead num="02" title="Experience" isMobile={isMobile}
+            note="From taking an AI travel platform to MVP to flying drones with no GPS."
+          />
+          <div style={{ borderBottom: `1px solid ${BORDER}` }}>
+            {WORK_EXPERIENCE.map((job) => (
+              <Entry key={job.company} when={job.period} title={job.title} sub={job.company} tag={job.tag} bullets={job.bullets} isMobile={isMobile} />
+            ))}
+            {HACKATHONS.map((h) => (
+              <Entry key={h.name} when="Hackathon" title={h.name} sub={`${h.org} · ${h.result}`} tag={h.tag} bullets={h.bullets} isMobile={isMobile} />
+            ))}
+            {EDUCATION.map((e) => (
+              <Entry key={e.institution} when={e.period} title={e.degree} sub={e.institution} tag="Education" bullets={e.details} isMobile={isMobile} />
+            ))}
+          </div>
+        </section>
+
+        {/* ── ABOUT + SKILLS ───────────────────────────────────────────────── */}
+        <section id="about" style={section()}>
+          <SectionHead num="03" title="About" isMobile={isMobile} />
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.6 }}
+            style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 320px", gap: isMobile ? 32 : 80, alignItems: "start" }}
+          >
+            <div>
+              <p style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: isMobile ? 30 : 44, lineHeight: 1.1, color: INK, margin: "0 0 56px", textTransform: "uppercase" }}>
+                I build at the <span style={{ color: ACCENT }}>boundaries</span> — where hardware meets software, and data meets inference.
+              </p>
+              <div>
+                {SKILLS.map((group) => (
+                  <div key={group.label} style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "180px 1fr", gap: isMobile ? 8 : 24, padding: "18px 0", borderTop: `1px solid ${BORDER}` }}>
+                    <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.12em", color: MUTED }}>{group.label.toUpperCase()}</div>
+                    <div style={{ fontSize: 15, color: INK, lineHeight: 1.7 }}>{group.items.join(", ")}</div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-            <div style={{ marginTop: 72 }}>
-              <div style={{ fontSize: 9, letterSpacing: "0.25em", color: MUTED, marginBottom: 32 }}>HACKATHONS</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 48 }}>
-                {HACKATHONS.map((h, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.4 }}
-                    style={{ display: "flex", gap: 28, maxWidth: 720 }}
-                  >
-                    <div style={{ width: 2, flexShrink: 0, background: `linear-gradient(180deg, ${ACCENT}, transparent)`, borderRadius: 2, minHeight: 100 }}/>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 6 }}>
-                        <div style={{ fontFamily: DISPLAY, fontWeight: 900, fontSize: 22, color: TEXT, letterSpacing: "-0.01em" }}>{h.name}</div>
-                        <span style={{ fontSize: 9, letterSpacing: "0.14em", color: ACCENT, border: `1px solid ${ACCENT}`, opacity: 0.7, padding: "3px 8px", borderRadius: 2, whiteSpace: "nowrap" }}>{h.tag}</span>
-                      </div>
-                      <div style={{ fontSize: 13, color: MUTED, marginBottom: 20 }}>{h.org} · {h.result}</div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                        {h.bullets.map((b, j) => (
-                          <div key={j} style={{ fontSize: 13, color: MUTED, lineHeight: 1.8 }}>· {b}</div>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
                 ))}
               </div>
             </div>
-          </motion.div>
-        </section>
-
-        {/* ── ABOUT ────────────────────────────────────────────────────────── */}
-        <section id="about" style={{ padding: `120px ${PAD}px`, position: "relative", borderTop: `1px solid ${BORDER}` }}>
-          <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.6 }}>
-            <SectionLabel num="04" label="ABOUT" />
-            <div style={{ display: "flex", gap: 64, alignItems: "flex-start", flexDirection: isMobile ? "column" : "row" }}>
-              <div style={{ flex: 1 }}>
-                <div style={{
-                  fontFamily: DISPLAY,
-                  fontSize: isMobile ? "clamp(36px,9vw,52px)" : "clamp(44px,5.5vw,76px)",
-                  fontWeight: 900, lineHeight: 1.08, letterSpacing: "-0.025em", marginBottom: 52,
-                }}>
-                  <span style={{ color: TEXT }}>I build at the </span>
-                  <span style={{ color: ACCENT }}>boundaries.</span>
-                  <br />
-                  <span style={{ color: MUTED, fontSize: "0.6em", fontWeight: 700 }}>
-                    Where hardware meets software,<br />data meets inference.
-                  </span>
-                </div>
-
-                <div style={{ display: "flex", borderTop: `1px solid ${BORDER}`, flexWrap: "wrap" }}>
-                  {[
-                    { label: "DEGREE",     value: "Computer Engineering" },
-                    { label: "UNIVERSITY", value: "York University" },
-                    { label: "STATUS",     value: "3rd year, 2023–Present" },
-                    { label: "CURRENTLY",  value: "AI Dev Intern @ Cotriply" },
-                  ].map((item, idx) => (
-                    <div key={item.label} style={{
-                      flex: "1 1 45%", padding: "20px 0",
-                      paddingRight: idx % 2 === 0 && !isMobile ? 32 : 0,
-                      borderBottom: `1px solid ${BORDER}`,
-                      borderRight: idx % 2 === 0 && !isMobile ? `1px solid ${BORDER}` : "none",
-                      paddingLeft: idx % 2 === 1 && !isMobile ? 32 : 0,
-                    }}>
-                      <div style={{ fontSize: 9, letterSpacing: "0.2em", color: MUTED, marginBottom: 8 }}>{item.label}</div>
-                      <div style={{ fontSize: 14, color: TEXT }}>{item.value}</div>
-                    </div>
-                  ))}
-                </div>
+            <div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/photo.jpg" alt="Nabeel Ahmed Kabir"
+                style={{ width: "100%", aspectRatio: "4 / 5", objectFit: "cover", objectPosition: "center top", display: "block", borderRadius: 2 }}
+              />
+              <div style={{ fontFamily: MONO, fontSize: 11, color: MUTED, marginTop: 12, display: "flex", justifyContent: "space-between" }}>
+                <span>FIG. 1 — THE ENGINEER</span><span>TORONTO, CA</span>
               </div>
-
-              {!isMobile && (
-                <div style={{ flexShrink: 0, width: 300, borderRadius: 4, overflow: "hidden", border: `1px solid ${BORDER}` }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/photo.jpg" alt="Nabeel Ahmed Kabir"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
-                  />
-                </div>
-              )}
             </div>
-          </motion.div>
-        </section>
-
-        {/* ── SKILLS ───────────────────────────────────────────────────────── */}
-        <section id="skills" style={{ padding: `120px ${PAD}px`, position: "relative", borderTop: `1px solid ${BORDER}` }}>
-          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.5 }}>
-            <SectionLabel num="05" label="SKILLS" />
-            <div style={{ fontFamily: DISPLAY, fontSize: isMobile ? 40 : 60, fontWeight: 900, color: TEXT, letterSpacing: "-0.02em", marginBottom: 48 }}>Capabilities</div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              {SKILLS.map((group, i) => (
-                <motion.div key={group.label} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.07, duration: 0.4 }}
-                  style={{ display: "flex", gap: isMobile ? 16 : 40, alignItems: "flex-start", flexDirection: isMobile ? "column" : "row", padding: "24px 0", borderBottom: `1px solid ${BORDER}` }}
-                >
-                  <div style={{ width: isMobile ? "auto" : 180, flexShrink: 0 }}>
-                    <span style={{ fontSize: 9, letterSpacing: "0.14em", color: MUTED }}>{group.label.toUpperCase()}</span>
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {group.items.map((item) => (
-                      <span key={item} style={{ fontSize: 13, padding: "6px 14px", borderRadius: 3, color: TEXT, border: `1px solid ${BORDER}` }}>{item}</span>
-                    ))}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </section>
-
-        {/* ── EDUCATION ────────────────────────────────────────────────────── */}
-        <section id="education" style={{ padding: `80px ${PAD}px`, position: "relative", borderTop: `1px solid ${BORDER}` }}>
-          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.4 }}>
-            <SectionLabel num="06" label="EDUCATION" />
-            {EDUCATION.map((e, i) => (
-              <div key={i} style={{ display: "flex", gap: 28, maxWidth: 660 }}>
-                <div style={{ width: 2, flexShrink: 0, background: `linear-gradient(180deg, ${ACCENT}, transparent)`, borderRadius: 2, minHeight: 80 }}/>
-                <div>
-                  <div style={{ fontFamily: DISPLAY, fontWeight: 900, fontSize: 22, color: TEXT, marginBottom: 6, letterSpacing: "-0.01em" }}>{e.degree}</div>
-                  <div style={{ fontSize: 13, color: MUTED, marginBottom: 16 }}>{e.institution} · {e.period}</div>
-                  {e.details.map((d, j) => (
-                    <div key={j} style={{ fontSize: 13, color: MUTED, lineHeight: 1.8, marginBottom: 4 }}>· {d}</div>
-                  ))}
-                </div>
-              </div>
-            ))}
           </motion.div>
         </section>
 
         {/* ── CONTACT ──────────────────────────────────────────────────────── */}
-        <section id="contact" style={{ padding: `80px ${PAD}px 140px`, position: "relative", background: ACCENT }}>
-          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.4 }}>
-            <SectionLabel num="07" label="CONTACT" light />
-            <div style={{
-              fontFamily: DISPLAY,
-              fontSize: isMobile ? "clamp(44px,11vw,64px)" : "clamp(60px,7vw,96px)",
-              fontWeight: 900, color: "#FFFFFF", letterSpacing: "-0.025em", marginBottom: 20, lineHeight: 1,
-            }}>
-              Let&apos;s work<br /><span style={{ color: BG }}>together.</span>
+        <section id="contact" style={section({ paddingBottom: isMobile ? 80 : 120 })}>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.6 }}
+          >
+            <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.18em", color: MUTED, marginBottom: 14 }}>
+              <span style={{ color: ACCENT }}>04</span> / CONTACT
             </div>
-            <div style={{ fontSize: 14, color: "rgba(245,240,232,0.65)", lineHeight: 1.85, marginBottom: 40, maxWidth: 440 }}>
-              Open to collaborations, new opportunities, and interesting problems in AI and software engineering.
-            </div>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              {LINKS.map((l) => (
-                <a key={l.label} href={l.href}
-                  target={l.href.startsWith("mailto:") ? undefined : "_blank"}
-                  rel={l.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
-                  style={{ fontSize: 13, color: "rgba(245,240,232,0.8)", border: "1px solid rgba(245,240,232,0.3)", padding: "11px 22px", borderRadius: 4, textDecoration: "none", transition: "border-color 0.2s, color 0.2s" }}
-                  onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(245,240,232,0.9)"; el.style.color = "#FFFFFF"; }}
-                  onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(245,240,232,0.3)"; el.style.color = "rgba(245,240,232,0.8)"; }}
-                >{l.label} ↗</a>
+            <h2 style={{ fontFamily: DISPLAY, fontWeight: 900, fontSize: isMobile ? 64 : "clamp(96px, 12vw, 180px)", lineHeight: 0.86, margin: "0 0 40px", color: INK, textTransform: "uppercase" }}>
+              Let&apos;s build<br /><span style={{ color: ACCENT }}>something.</span>
+            </h2>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
+              <button onClick={copyEmail} className="btn btn-solid" style={{ cursor: "pointer", border: "none", font: "inherit" }}>
+                {copied ? "Copied ✓" : "nabeelahmedkabir@gmail.com"}
+              </button>
+              {LINKS.filter((l) => l.label !== "Email").map((l) => (
+                <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer" className="ulink">{l.label} ↗</a>
               ))}
-              <button onClick={copyEmail} style={{
-                fontSize: 13, color: copied ? "#FFF" : ACCENT, fontWeight: 700,
-                background: copied ? "#16A34A" : BG,
-                padding: "11px 22px", borderRadius: 4, border: "none",
-                transition: "background 0.3s, color 0.3s", cursor: "none",
-              }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = "0.9")}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = "1")}
-              >{copied ? "Copied! ✓" : "Copy Email"}</button>
             </div>
           </motion.div>
         </section>
 
         {/* ── FOOTER ───────────────────────────────────────────────────────── */}
         <footer style={{
-          borderTop: `1px solid ${BORDER}`,
-          padding: `20px ${PAD}px`,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          background: BG,
+          maxWidth: 1280, margin: "0 auto", padding: `24px ${PAD}px 32px`,
+          borderTop: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between",
+          fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", color: MUTED,
         }}>
-          <span style={{ fontFamily: DISPLAY, fontWeight: 900, fontSize: 12, color: MUTED, letterSpacing: "0.05em" }}>
-            Nabeel Ahmed Kabir
-          </span>
-          <span style={{ fontSize: 10, letterSpacing: "0.15em", color: MUTED }}>© 2026</span>
+          <span>NAK-01 · REV 3</span>
+          <span>© 2026 NABEEL AHMED KABIR</span>
         </footer>
-
-      </div>
+      </main>
 
       <style>{`
         * { box-sizing: border-box; }
-        body { margin: 0; background: ${BG}; }
-        @media (pointer: fine) { * { cursor: none !important; } }
-        .cursor-blink { animation: blink 1.1s step-end infinite; color: ${ACCENT}; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        html { scroll-behavior: smooth; }
-        ::-webkit-scrollbar { display: none; }
-        .grain { animation: grain 0.45s steps(1) infinite; }
-        @keyframes grain {
-          0%   { transform: translate(0, 0); }
-          10%  { transform: translate(-5%, -10%); }
-          20%  { transform: translate(-15%, 5%); }
-          30%  { transform: translate(7%, -25%); }
-          40%  { transform: translate(-5%, 25%); }
-          50%  { transform: translate(-15%, 10%); }
-          60%  { transform: translate(15%, 0%); }
-          70%  { transform: translate(0%, 15%); }
-          80%  { transform: translate(3%, 35%); }
-          90%  { transform: translate(-10%, 10%); }
-          100% { transform: translate(0, 0); }
-        }
-        .marquee-track { animation: marquee 32s linear infinite; }
-        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-      `}</style>
+        html, body { margin: 0; background: ${BG}; }
+        body { font-family: var(--font-geist-sans), system-ui, sans-serif; color: ${INK}; }
+        ::selection { background: ${ACCENT}; color: #fff; }
+        a { color: inherit; text-decoration: none; }
 
-      <AnimatePresence>
-        {selectedProject && <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />}
-      </AnimatePresence>
+        .nav-link { color: ${MUTED}; transition: color 0.2s; }
+        .nav-link:hover { color: ${ACCENT}; }
+
+        .btn {
+          display: inline-block; font-size: 14px; padding: 12px 22px; border-radius: 999px;
+          border: 1px solid ${INK}; color: ${INK}; transition: background 0.2s, color 0.2s;
+        }
+        .btn:hover { background: ${INK}; color: ${BG}; }
+        .btn-solid { background: ${INK}; color: ${BG}; }
+        .btn-solid:hover { background: ${ACCENT}; border-color: ${ACCENT}; color: #fff; }
+
+        .ulink, .ulink-static {
+          font-size: 14px; color: ${INK};
+          background: linear-gradient(${ACCENT}, ${ACCENT}) 0 100% / 100% 1px no-repeat;
+          padding-bottom: 2px; transition: color 0.2s;
+        }
+        .ulink:hover { color: ${ACCENT}; }
+
+        .row .row-name { display: inline-block; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), color 0.2s; }
+        .row .row-plus { transition: transform 0.3s, color 0.2s; }
+        .row:hover .row-name { transform: translateX(10px); }
+        .row:hover .row-idx, .row.open .row-idx, .row:hover .row-plus { color: ${ACCENT} !important; }
+        .row.open .row-plus { transform: rotate(45deg); color: ${ACCENT} !important; }
+
+        .pulse { stroke-dasharray: 22 1000; stroke-dashoffset: 22; animation: pulse 3.6s linear infinite; }
+        @keyframes pulse { from { stroke-dashoffset: 22; } to { stroke-dashoffset: -1000; } }
+        .hint-chev { animation: chev 1.8s ease-in-out infinite; }
+        @keyframes chev { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+
+        @media (prefers-reduced-motion: reduce) {
+          .chip-hero { height: 100vh !important; }
+          .pulse, .hint-chev { animation: none; }
+        }
+      `}</style>
     </>
   );
 }
